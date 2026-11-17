@@ -1,2 +1,4 @@
 -r requirements.txt
 asyncpg>=0.28,<1
+# 兼容 HoshinoBot 常用的 aiohttp 3.8.x；asyncpg 在 Python 3.8 上也可使用 4.x。
+async-timeout>=4.0.3,<5

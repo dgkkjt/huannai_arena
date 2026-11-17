@@ -1,6 +1,7 @@
 import datetime
 import traceback
 from typing import List, Optional
+from ..compat import model_to_dict
 from .model import (
     BattleRequestDTO,
     BattleResponseDTO,
@@ -86,24 +87,26 @@ class Query:
 
         # 构建请求列表，每个队伍组合一个请求，使用 RepeatCount 指定重复次数
         all_requests = [
-            BattleRequestDTO(
-                PlayerList=[UnitDTO(unitId=uid) for uid in user_team],
-                EnemyList=[UnitDTO(unitId=eid) for eid in enemy_team],
-                GuildEnemyList=[],
-                UBExecTimeList=[],
-                SemanUBExecTimeList=[],
-                ToMaxUnitAttr=True,
-                IsAutoMode=True,
-                IsSetMode=False,
-                IsSemanMode=False,
-                IsGuildBattle=False,
-                Settings=GuildRandomDataDTO(),
-                RepeatCount=simulations_per_team,
-                TalentSkillLevels=mzq_config.default_progression.talent_skill_levels,
-                TalentSkillNodeLevels=mzq_config.default_progression.talent_skill_node_levels,
-                MasterSkillNodeLevels=mzq_config.default_progression.master_skill_node_levels,
-                RoleMastery=mzq_config.default_progression.role_mastery,
-            ).dict()
+            model_to_dict(
+                BattleRequestDTO(
+                    PlayerList=[UnitDTO(unitId=uid) for uid in user_team],
+                    EnemyList=[UnitDTO(unitId=eid) for eid in enemy_team],
+                    GuildEnemyList=[],
+                    UBExecTimeList=[],
+                    SemanUBExecTimeList=[],
+                    ToMaxUnitAttr=True,
+                    IsAutoMode=True,
+                    IsSetMode=False,
+                    IsSemanMode=False,
+                    IsGuildBattle=False,
+                    Settings=GuildRandomDataDTO(),
+                    RepeatCount=simulations_per_team,
+                    TalentSkillLevels=mzq_config.default_progression.talent_skill_levels,
+                    TalentSkillNodeLevels=mzq_config.default_progression.talent_skill_node_levels,
+                    MasterSkillNodeLevels=mzq_config.default_progression.master_skill_node_levels,
+                    RoleMastery=mzq_config.default_progression.role_mastery,
+                )
+            )
             for user_team, enemy_team in zip(user_ids, enemy_ids)
         ]
         # 定义响应处理器
@@ -184,23 +187,25 @@ class Query:
     async def get_default_development(self) -> VersionResponseDTO:
         """获取默认练度信息"""
         request = [
-            BattleRequestDTO(
-                PlayerList=[UnitDTO(unitId=170101)],
-                EnemyList=[UnitDTO(unitId=170101)],
-                GuildEnemyList=[],
-                UBExecTimeList=[],
-                SemanUBExecTimeList=[],
-                ToMaxUnitAttr=True,
-                IsAutoMode=True,
-                IsSetMode=False,
-                IsSemanMode=False,
-                IsGuildBattle=False,
-                RepeatCount=1,
-                TalentSkillLevels=mzq_config.default_progression.talent_skill_levels,
-                TalentSkillNodeLevels=mzq_config.default_progression.talent_skill_node_levels,
-                MasterSkillNodeLevels=mzq_config.default_progression.master_skill_node_levels,
-                RoleMastery=mzq_config.default_progression.role_mastery,
-            ).dict()
+            model_to_dict(
+                BattleRequestDTO(
+                    PlayerList=[UnitDTO(unitId=170101)],
+                    EnemyList=[UnitDTO(unitId=170101)],
+                    GuildEnemyList=[],
+                    UBExecTimeList=[],
+                    SemanUBExecTimeList=[],
+                    ToMaxUnitAttr=True,
+                    IsAutoMode=True,
+                    IsSetMode=False,
+                    IsSemanMode=False,
+                    IsGuildBattle=False,
+                    RepeatCount=1,
+                    TalentSkillLevels=mzq_config.default_progression.talent_skill_levels,
+                    TalentSkillNodeLevels=mzq_config.default_progression.talent_skill_node_levels,
+                    MasterSkillNodeLevels=mzq_config.default_progression.master_skill_node_levels,
+                    RoleMastery=mzq_config.default_progression.role_mastery,
+                )
+            )
         ]
 
         result_data = await self.query(

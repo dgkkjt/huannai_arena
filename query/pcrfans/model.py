@@ -19,7 +19,7 @@ class ResultItem(BaseModel):
     updated: str
     up: int
     down: int
-    comment: Optional[str]
+    comment: Optional[str] = None
     liked: bool
     disliked: bool
 

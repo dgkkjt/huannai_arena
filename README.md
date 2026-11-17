@@ -44,6 +44,8 @@ cd huannai_arena
 python -m pip install -r requirements.txt
 ```
 
+支持 Pydantic 1.10.13 及以上的 1.x 和 Pydantic 2.x，已验证 2.5.3。已有环境需要保持 2.5.3 时，安装命令为 `python -m pip install -r requirements.txt "pydantic==2.5.3"`；使用 PostgreSQL 时将依赖文件替换为 `requirements-pgsql.txt`。安装后可运行 `python -m pip check` 检查其他机器人插件的依赖约束。
+
 角色名解析、头像和点赞图标使用 Hoshino 的 `priconne` 资源，请先准备好角色别名与对应图片资源。
 
 ### 2. 配置摸轴器和游戏数据库
@@ -92,6 +94,8 @@ Windows 绝对路径示例为 `sqlite+aiosqlite:///D:/HoshinoBot/data/pcr_cn.db`
 ```bash
 python -m pip install -r requirements-pgsql.txt
 ```
+
+PostgreSQL 依赖将 `async-timeout` 限制在 `>=4.0.3,<5`，以兼容机器人环境中的 `aiohttp 3.8.x`。如果之前安装驱动后提示 `aiohttp 3.8.1` 与 `async-timeout 5.0.1` 冲突，重新执行上面的安装命令即可降回兼容版本，再运行 `python -m pip check` 检查环境依赖。
 
 在 `config.json` 的 `database` 中配置：
 

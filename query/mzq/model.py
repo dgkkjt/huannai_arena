@@ -96,13 +96,9 @@ class BattleRequestDTO(BaseModel):
     IsSemanMode: bool = False
     IsGuildBattle: bool = True
     Settings: GuildRandomDataDTO = Field(default_factory=lambda: GuildRandomDataDTO())
-    TalentSkillLevels: Optional[dict] = Field(default_factory=dict, default_value=None)
-    TalentSkillNodeLevels: Optional[dict] = Field(
-        default_factory=dict, default_value=None
-    )
-    MasterSkillNodeLevels: Optional[dict] = Field(
-        default_factory=dict, default_value=None
-    )
+    TalentSkillLevels: Optional[dict] = Field(default_factory=dict)
+    TalentSkillNodeLevels: Optional[dict] = Field(default_factory=dict)
+    MasterSkillNodeLevels: Optional[dict] = Field(default_factory=dict)
     RoleMastery: Dict[int, List[int]] = Field(default_factory=dict)
     BattleTime: int = 0
     WaveGroupId: int = 0
@@ -143,7 +139,7 @@ class BattleResponseDTO(BaseModel):
     Success: bool = False
     Message: Optional[str] = None
 
-    Stats: Optional[StatsDTO] = Field(default_factory=StatsDTO)
+    Stats: Optional[StatsDTO] = None
 
     BattleFrames: int = 0
     CurrentSeed: int = 0
