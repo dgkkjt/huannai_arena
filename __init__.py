@@ -237,7 +237,12 @@ async def arena_matrix_query(bot: HoshinoBot, ev: CQEvent):
 
 
 @sv.on_fullmatch(
-    [f"#{aliase}" for aliase in (aliases + aliases_b + aliases_tw + aliases_jp)]
+    # Hoshino 的 fullmatch 仍占用前缀表，#jjc 会挡住 AutoPCR 的 # 工具入口。
+    [
+        f"#{aliase}"
+        for aliase in (aliases + aliases_b + aliases_tw + aliases_jp)
+        if not aliase.endswith("jjc")
+    ]
 )
 async def continue_arena_query(bot, ev):
     region = 1
