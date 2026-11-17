@@ -189,7 +189,7 @@ async def arena_matrix_query(bot: HoshinoBot, ev: CQEvent):
         return
 
 
-@sv.on_prefix(
+@sv.on_fullmatch(
     [f"#{aliase}" for aliase in (aliases + aliases_b + aliases_tw + aliases_jp)]
 )
 async def continue_arena_query(bot, ev):
