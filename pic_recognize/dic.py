@@ -55,10 +55,10 @@ async def update_dic():
     cnt_success = 0
     for file, icon_id in icon_list:
         try:
-            img = Image.open(str(nowpath / file))
-            img = img.convert("RGB")
-            img = img.resize((128, 128))
-            dic[icon_id] = np.array(img)
+            with Image.open(file) as img:
+                img = img.convert("RGB")
+                img = img.resize((128, 128))
+                dic[icon_id] = np.array(img)
             cnt_success += 1
         except Exception as e:
             msg.append(f"Warning. 头像{icon_id}加入识别库失败：{e}")
