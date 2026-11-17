@@ -90,7 +90,7 @@ def identify_square_regions(img: Image.Image, mode: int):
             return [x[1] for x in icon], []
 
 
-def recognize_unit(img2: Image.Image) -> tuple[int, int, str, int]:
+def recognize_unit(img2: Image.Image) -> Tuple[int, int, str, int]:
     img2 = img2.convert("RGB").resize((128, 128), Image.Resampling.LANCZOS)
     img3 = np.array(img2)
     img4 = img3[25:96, 8:97, :]

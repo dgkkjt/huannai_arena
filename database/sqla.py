@@ -4,14 +4,13 @@ from typing import (
     Any,
     Awaitable,
     Callable,
-    Concatenate,
     Dict,
     List,
-    ParamSpec,
     Tuple,
     TypeVar,
     overload,
 )
+from typing_extensions import Concatenate, ParamSpec
 
 from sqlalchemy import delete, func, or_, tuple_
 from sqlalchemy.future import select

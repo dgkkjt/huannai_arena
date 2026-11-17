@@ -27,11 +27,11 @@ def outp_b64(outp_img: Image.Image) -> str:
     return f"[CQ:image,file={base64_str}]"
 
 
-def ids_to_str(id_list: list[int]) -> str:
+def ids_to_str(id_list: List[int]) -> str:
     return "".join(str(i) for i in sorted(id_list))
 
 
-def str_to_ids(id_str: str, length: int = 6) -> list[int]:
+def str_to_ids(id_str: str, length: int = 6) -> List[int]:
     return [int(id_str[i : i + length]) for i in range(0, len(id_str), length)]
 
 

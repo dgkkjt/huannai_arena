@@ -1,4 +1,5 @@
 # HoshinoBot / NoneBot 1 请使用现有机器人环境，不在此重复安装。
+typing-extensions>=4.1,<5
 httpx>=0.24,<1
 loguru>=0.7,<1
 numpy>=1.24,<2
