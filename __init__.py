@@ -12,9 +12,11 @@ from hoshino import Service
 from .pic_recognize.dic import update_dic
 from hoshino.typing import CQEvent, HoshinoBot
 from hoshino.util import FreqLimiter
+from loguru import logger
 from .setting import db_config, mzq_config
 from .database.migrate import migrate_arena_to_pgsql
-from .database.sqla import arena_sqla
+from .database.sqla import arena_sqla, pcr_sqla
+from .database.update import update_pcr_database
 from .utils.arena import ArenaQuery
 from .draw import render_atk_def_teams, render_matrix
 from .query.mzq import mzq_query
@@ -31,6 +33,7 @@ sv_help = """
 [#怎么拆] 开始连续图片查询竞技场解法
 [结束查询] 结束连续图片查询
 [竞技场更新卡池] 更新竞技场识别卡池
+[竞技场更新数据库] 下载最新国服游戏数据库并更新卡池
 PS1：可以用“#” 表示分隔队伍
 如：竞技场建议 环奈春环千爱瑠银莲雪菲#美空铃奈ams日和ue 查询多队解法
 PS2：怎么拆和作业网查询支持指定区域查询 （支持b，台，日）
@@ -58,6 +61,50 @@ async def init_database():
             await migrate_arena_to_pgsql(db_config.arena_url, db_config.arena_pgsql_url)
         except Exception:
             traceback.print_exc()
+    await refresh_pcr_database()
+
+
+async def refresh_pcr_database(force=False):
+    try:
+        updated = await update_pcr_database(force=force)
+    except Exception:
+        logger.exception("国服游戏数据库更新失败，保留原数据库")
+        if force:
+            raise
+        updated = False
+    # 下载失败仍尝试使用原数据库；禁用自动更新时也加载本地角色数据。
+    if not updated:
+        try:
+            path = pcr_sqla.engine.url.database
+            if pcr_sqla.engine.url.get_backend_name() == "sqlite" and not Path(path).is_file():
+                raise FileNotFoundError("游戏数据库尚未下载")
+            await pcr_sqla.get_all_units()
+        except Exception:
+            logger.exception("游戏数据库读取失败，请检查 pcr_url 或执行竞技场更新数据库")
+            if force:
+                raise
+    if updated:
+        try:
+            await update_dic()
+        except Exception:
+            logger.exception("数据库已更新，但卡池更新失败，请准备头像后执行竞技场更新卡池")
+            return "游戏数据库更新成功，卡池更新失败，请检查头像资源并执行竞技场更新卡池"
+    return "国服游戏数据库和识别卡池更新成功" if updated else "已读取本地游戏数据库"
+
+
+@sv.on_fullmatch("竞技场更新数据库")
+async def _update_pcr_database(bot, ev):
+    try:
+        message = await refresh_pcr_database(force=True)
+    except Exception as error:
+        message = f"游戏数据库更新失败，原数据库已保留：{error}"
+    await bot.send(ev, message)
+
+
+@sv.scheduled_job("cron", hour="11", minute="45")
+async def _update_pcr_database_cron():
+    if db_config.pcr_auto_update:
+        await refresh_pcr_database()
 
 
 @sv.on_fullmatch("竞技场对战帮助")

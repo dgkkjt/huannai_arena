@@ -1,4 +1,7 @@
 from functools import wraps
+import asyncio
+import os
+from pathlib import Path
 import time
 from typing import (
     Any,
@@ -50,9 +53,17 @@ def session(
 ) -> Callable[Concatenate[Any, P], Awaitable[T]]:
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
-        async with self.async_session() as _session:
-            async with _session.begin():
-                return await func(self, _session, *args, **kwargs)
+        async def run():
+            async with self.async_session() as _session:
+                async with _session.begin():
+                    return await func(self, _session, *args, **kwargs)
+
+        # 游戏库换文件时等待已有读取结束；竞技场记录库不受此锁影响。
+        lock = getattr(self, "access_lock", None)
+        if lock is None:
+            return await run()
+        async with lock:
+            return await run()
 
     return wrapper  # 返回包装后的函数
 
@@ -70,6 +81,27 @@ class PCRDatabase:
             self.engine, expire_on_commit=False, class_=AsyncSession
         )
         self.units: Dict[int, UnitData] = {}
+        self._access_lock = None
+        self._update_lock = None
+
+    @property
+    def access_lock(self):
+        # Python 3.8 的 Lock 绑定创建时的事件循环，需要在异步调用内创建。
+        if self._access_lock is None:
+            self._access_lock = asyncio.Lock()
+        return self._access_lock
+
+    @property
+    def update_lock(self):
+        if self._update_lock is None:
+            self._update_lock = asyncio.Lock()
+        return self._update_lock
+
+    async def replace_database(self, downloaded: Path, units: dict):
+        async with self.access_lock:
+            await self.engine.dispose()
+            os.replace(str(downloaded), self.engine.url.database)
+            self.units = units
 
     def check_units_exist(self, unit_ids: List[int]) -> bool:
         """检查单位ID是否都存在于数据库中"""

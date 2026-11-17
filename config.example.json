@@ -5,6 +5,7 @@
     "timeout": 10
   },
   "database": {
+    "pcr_auto_update": true,
     "use_pgsql": false,
     "arena_pgsql_url": "",
     "migrate_to_pgsql": false,

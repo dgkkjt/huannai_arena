@@ -5,6 +5,12 @@ from pathlib import Path
 from .constants import DATA_PATH
 
 
+# 已部署的旧文件继续使用；全新部署默认下载为 pcr_cn.db。
+_pcr_path = DATA_PATH / "pcr_cn.db"
+if not _pcr_path.exists() and (DATA_PATH / "pcr_data.db").is_file():
+    _pcr_path = DATA_PATH / "pcr_data.db"
+
+
 @dataclass
 class PCRFANSConfig:
     api = "https://api.pcrdfans.com/x/v1/search"
@@ -80,8 +86,11 @@ class MzqConfig:
 @dataclass
 class dbConfig:  # 公主连结外部数据库配置
 
-    pcr_url = f"sqlite+aiosqlite:///{DATA_PATH / 'pcr_data.db'}"  # 公主连结游戏数据库
-    pcr_update_path = DATA_PATH / "pcr_data.db"  # 用于更新数据的数据库路径,可以为空
+    pcr_url = f"sqlite+aiosqlite:///{_pcr_path}"  # 公主连结游戏数据库
+    pcr_update_path = ""  # 留空时从 pcr_url 获取；非空时必须与其指向同一文件
+    pcr_auto_update = True  # 启动时及每天 11:45 更新国服数据库
+    pcr_download_url = "https://pcr.cialloworld.com/api/databases?region=cn&compression=br&download=1"
+    pcr_download_timeout = 60  # 下载连接及每次读取的超时时间（秒）
 
     arena_url = (
         f"sqlite+aiosqlite:///{DATA_PATH / 'arena.db'}"  # 竞技场数据数据库连接URL

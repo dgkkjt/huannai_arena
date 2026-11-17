@@ -71,7 +71,11 @@ python -m pip install -r requirements.txt
 - `mzq.client_key`：服务端需要鉴权时填写，通过 `X-Client-Key` 请求头发送。
 - `mzq.timeout`：每组请求的基础超时时间（秒），批量请求按组数放大。
 
-插件另外需要公主连结的 SQLite 游戏数据库，默认读取 `resources/data/pcr_data.db`。请自行准备与所用版本匹配、至少包含 `unit_data`、`unit_talent` 表的数据库；本仓库不附带游戏数据库。
+插件会自动下载公主连结国服 SQLite 游戏数据库，首次启动时保存为 `resources/data/pcr_cn.db`。启动时和每天 11:45 下载最新数据库，成功后自动刷新角色数据和图片识别卡池；也可发送 `竞技场更新数据库` 立即更新。定时时间以机器人进程配置为准。
+
+下载源与 [kanna_note](https://github.com/SonderXiaoming/kanna_note/blob/master/base.py) 一致：`https://pcr.cialloworld.com/api/databases?region=cn&compression=br&download=1`。依赖中已包含解压所需的 Brotli。下载内容先进行解压完整性、SQLite 完整性及角色表检查，通过后关闭本插件的游戏库连接并原子替换文件；下载或校验失败保留原数据库。数据库更新成功但头像资源不全时，可准备好资源后执行 `竞技场更新卡池`。
+
+旧部署如果只有 `resources/data/pcr_data.db`，会继续使用并更新该文件。显式配置的 `pcr_url` 始终优先；本仓库不附带游戏数据库文件。
 
 如果已有 `pcr_wiki` 或其他来源的游戏数据库，可以在 `config.json` 的 `database` 中增加 `pcr_url`，直接使用已有文件：
 
@@ -79,7 +83,11 @@ python -m pip install -r requirements.txt
 "pcr_url": "sqlite+aiosqlite:////absolute/path/to/pcr_cn.db"
 ```
 
-Windows 绝对路径示例为 `sqlite+aiosqlite:///D:/HoshinoBot/data/pcr_cn.db`。请自行更新游戏数据库，`pcr_update_path` 目前只是预留配置，不会自动下载数据。
+Windows 绝对路径示例为 `sqlite+aiosqlite:///D:/HoshinoBot/data/pcr_cn.db`。自动更新写入 `pcr_url` 指定的文件；`pcr_update_path` 默认留空，如填写则必须指向同一文件。
+
+如果这个游戏数据库由其他插件负责更新，可在 `database` 中增加 `"pcr_auto_update": false`，本插件将只读取本地库，手动指令仍可强制更新。多个实例应各自维护本机的游戏库；共用 PostgreSQL 的竞技场记录库不受此设置影响。
+
+下载源和超时可通过 `database.pcr_download_url`、`database.pcr_download_timeout` 修改。自定义下载源须提供 Brotli 压缩的国服 SQLite 数据库，超时默认 60 秒（连接及每次读取）。
 
 `config.json` 已加入忽略规则，请把实际地址、密钥和数据库密码放在这里，勿提交到仓库。未配置摸轴器 API 时，仍可使用作业网查询；模拟相关功能需要先配置 API。
 
@@ -145,6 +153,7 @@ python database/migrate.py
 | `结束查询` | 结束连续图片查询 |
 | `竞技场模拟练度` | 查询摸轴器默认练度与本地设定的职能精通 |
 | `竞技场更新卡池` | 更新图片识别卡池 |
+| `竞技场更新数据库` | 下载国服游戏数据库，刷新角色数据与识别卡池 |
 
 例子：
 
